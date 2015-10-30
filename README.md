@@ -1,8 +1,6 @@
 README
 ======
 
-Hint: If markdown is not your cup of tea, try
-
 Requirements
 ------------
 This application requires Python to be installed. It was tested using Python 2.7.10, but should work with versions 2.7 and higher (3.x).
@@ -49,8 +47,25 @@ or
 Line 4: Unknown instance type 'M5'
 ```
 
+Corner cases
+------------
+When all slots for an instance type are filled, applying the "most filled" definition will not return any results. I have chosen to handle this case by setting `(host_count, empty_slots)` to `(0, 0)` in the output file. This will never overlap with results produced in the general case (because `empty_slots=0` is not allowed).
+
+### Example
+Given the input file...
+```
+0,M1,1,1
+```
+..the following output will be generated:
+```
+EMPTY: M1=0;
+FULL: M1=1;
+MOST_FILLED: M1=0,0;
+```
+
 Tests
 -----
+Run `./tests.py` or `python tests.py`.
 
 
 Why Python?

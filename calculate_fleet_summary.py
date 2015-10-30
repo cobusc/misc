@@ -56,7 +56,12 @@ def parse_line(content, line_number):
     :raises InputValidation: on
     """
 
-    host_id, instance_type, num_slots, slot_info_list = content.split(',', 3)
+    try:
+        host_id, instance_type,\
+        num_slots, slot_info_list = content.split(',', 3)
+    except ValueError:
+        msg = "Not enough fields to perform initial split."
+        raise InputValidationError(line_number, msg)
 
     try:
         host_id = int(host_id)
@@ -104,10 +109,17 @@ def get_most_filled_info(instance_type_counters):
     :param dict instance_type_counters: {empty_slots: host_count, ...}
     :retuns tuple: (host_count, empty_slots)
     """
-    # Find the minimum empty slot count
-    empty_slots = min(x for x in instance_type_counters.keys() if x > 0)
-    # Get the associated host count
-    host_count = instance_type_counters[empty_slots]
+    # Find the minimum empty slot count. In corner cases there may
+    # be no eligable entries to work with.
+    eligable_entries = [x for x in instance_type_counters.keys() if x > 0]
+    if eligable_entries:
+        empty_slots = min(eligable_entries)
+        # Get the associated host count
+        host_count = instance_type_counters[empty_slots]
+    else:
+        empty_slots = 0
+        host_count = 0
+
     return (host_count, empty_slots)
 
 
@@ -175,7 +187,7 @@ def process_file(input_filename=INPUT_FILENAME,
             stats += " {}={},{};".format(instance_type, host_count,
                                          empty_slots)
 
-        output_file.write("MOST_FILLED:{}\n".format(stats))
+        output_file.write("MOST FILLED:{}\n".format(stats))
 
 
 if __name__ == "__main__":
