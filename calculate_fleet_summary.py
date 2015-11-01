@@ -47,18 +47,19 @@ def parse_line(content, line_number):
     """Parse and validate input lines.
 
     Assumptions:
-    * We assume that a host has at least one slot
+    * We assume that a host has at least one slot (i.e. num_slots=0 is
+      not supported)
 
     :param str content: The input line
     :param int line_number: The line number in the file (starting at 1)
     :return tuple: (host_id, instance_type, num_slots, slot_info) where
         slot_info is a list of integers
-    :raises InputValidation: on
+    :raises InputValidation: on input validation errors
     """
 
     try:
         host_id, instance_type,\
-        num_slots, slot_info_list = content.split(',', 3)
+         num_slots, slot_info_list = content.split(',', 3)
     except ValueError:
         msg = "Not enough fields to perform initial split."
         raise InputValidationError(line_number, msg)
@@ -125,6 +126,13 @@ def get_most_filled_info(instance_type_counters):
 
 def process_file(input_filename=INPUT_FILENAME,
                  output_filename=OUTPUT_FILENAME):
+    """Reads a fleet state information file and produces statistics based in it.
+
+    :param str input_filename: The file containing the fleet information.
+    :param str output_filename: The file to which the results will be written.
+    :returns True: On success
+    :raises InputValidation: on input validation errors
+    """
     # Initialise counters for the instance types.
     empty_hosts_count = {instance_type: 0 for instance_type in INSTANCE_TYPES}
     full_hosts_count = {instance_type: 0 for instance_type in INSTANCE_TYPES}
@@ -147,7 +155,7 @@ def process_file(input_filename=INPUT_FILENAME,
         line_number = 1
         for line in input_file:
             host_id, instance_type,\
-            num_slots, slot_info = parse_line(line, line_number)
+             num_slots, slot_info = parse_line(line, line_number)
 
             if host_id in host_ids_seen:
                 msg = "Host ID '{}' specified more than once.".format(host_id)
@@ -170,15 +178,15 @@ def process_file(input_filename=INPUT_FILENAME,
             line_number += 1
 
     with open(output_filename, "w") as output_file:
-        stats = string.join([" {}={};".format(instance_type,
-                                              empty_hosts_count[instance_type])
+        stats = string.join(["{}={};".format(instance_type,
+                                             empty_hosts_count[instance_type])
                              for instance_type in INSTANCE_TYPES])
-        output_file.write("EMPTY:{}\n".format(stats))
+        output_file.write("EMPTY: {}\n".format(stats))
 
-        stats = string.join([" {}={};".format(instance_type,
-                                              full_hosts_count[instance_type])
+        stats = string.join(["{}={};".format(instance_type,
+                                             full_hosts_count[instance_type])
                              for instance_type in INSTANCE_TYPES])
-        output_file.write("FULL:{}\n".format(stats))
+        output_file.write("FULL: {}\n".format(stats))
 
         stats = ""
         for instance_type in INSTANCE_TYPES:
@@ -189,10 +197,11 @@ def process_file(input_filename=INPUT_FILENAME,
 
         output_file.write("MOST FILLED:{}\n".format(stats))
 
+    return True
+
 
 if __name__ == "__main__":
     try:
         process_file()
     except Exception, e:
-        sys.exit(str(e))
-
+        sys.exit(str(e))  # An exit code of 1 will be generated

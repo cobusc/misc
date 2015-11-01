@@ -13,9 +13,9 @@ For each instance type, the count of empty hosts (all slots empty)
     For each instance type, the count of full hosts (all slots filled)
     For each instance type, the count of the most filled hosts (having the smallest number of empty slots > 0). Both the host count and number of empty slots must be written out in that order.
 
-    The output file must have the following format:
+The output file must have the following format:
 
-    EMPTY: M1=<count>; M2=<count>; M3=<count>;
+EMPTY: M1=<count>; M2=<count>; M3=<count>;
 FULL: M1=<count>; M2=<count>; M3=<count>;
 MOST FILLED: M1=<count>,<empty slots>; M2=<count>,<empty slots>; M3=<count>,<empty slots>;
 
